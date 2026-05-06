@@ -64,5 +64,12 @@ public class Partita {
 	 */
 	public void setFinita() {
 		this.finita = true;
+	}
+
+	@Override
+	public String toString() {
+		return "Partita [labirinto=" + labirinto + ", giocatore=" + giocatore + ", finita=" + finita
+				+ ", stanzaCorrente=" + stanzaCorrente + "]";
 	}	
+	
 }
