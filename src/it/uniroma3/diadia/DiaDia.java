@@ -1,8 +1,9 @@
 package it.uniroma3.diadia;
 
+import it.uniroma3.diadia.ambienti.Labirinto;
 import it.uniroma3.diadia.comandi.Comando;
 import it.uniroma3.diadia.comandi.FabbricaDiComandi;
-import it.uniroma3.diadia.comandi.FabbricaDiComandiFisarmonica;
+import it.uniroma3.diadia.comandi.FabbricaDiComandiRiflessiva;
 
 /**
  * Classe principale di diadia, un semplice gioco di ruolo ambientato al dia.
@@ -27,23 +28,28 @@ public class DiaDia {
 			"puoi raccoglierli, usarli, posarli quando ti sembrano inutili\n" +
 			"o regalarli se pensi che possano ingraziarti qualcuno.\n\n"+
 			"Per conoscere le istruzioni usa il comando 'aiuto'.";
-	
+
 	private Partita partita;
 
 	private IO io;
-	
+
 	public DiaDia(IO io) {
 		this.io = io;
 		this.partita = new Partita();
 	}
 
+	public DiaDia(Labirinto labirinto, IO io) {
+		this.io = io;
+		this.partita = new Partita(labirinto);
+	}
+
 	public void gioca() {
-	    String istruzione;
-	    this.io.mostraMessaggio(MESSAGGIO_BENVENUTO); 
-	        
-	    do {
-	        istruzione = this.io.leggiRiga(); // 
-	    } while (!processaIstruzione(istruzione));
+		String istruzione;
+		this.io.mostraMessaggio(MESSAGGIO_BENVENUTO); 
+
+		do {
+			istruzione = this.io.leggiRiga(); // 
+		} while (!processaIstruzione(istruzione));
 	}  
 
 
@@ -51,31 +57,55 @@ public class DiaDia {
 	 * Processa una istruzione 
 	 *
 	 * @return true se l'istruzione e' eseguita e il gioco continua, false altrimenti
+	 * @throws Exception 
 	 */
 	private boolean processaIstruzione(String istruzione) {
-	    Comando comandoDaEseguire;
-	    FabbricaDiComandi factory = new FabbricaDiComandiFisarmonica();
-	    
-	    comandoDaEseguire = factory.costruisciComando(istruzione);
-	    
-	    comandoDaEseguire.setIO(this.io);
-	    
-	    comandoDaEseguire.esegui(this.partita);
-	    
-	    if (this.partita.vinta()) {
-	    	this.io.mostraMessaggio("Hai vinto!");
-	    }
-	    
-	    if (this.partita.getGiocatore().getCfu() == 0) {
-	    	this.io.mostraMessaggio("Hai esaurito i CFU...");
-	    }
-	    
-	    return this.partita.isFinita();
+		Comando comandoDaEseguire;
+		FabbricaDiComandi factory = new FabbricaDiComandiRiflessiva();
+
+		try {
+			comandoDaEseguire = factory.costruisciComando(istruzione);
+		}
+		catch (Exception e) {
+			this.io.mostraMessaggio("Ops! C'è stato un problema di sistema con questo comando.");
+			return false;
+		}
+
+		comandoDaEseguire.setIO(this.io);
+
+		comandoDaEseguire.esegui(this.partita);
+
+		if (this.partita.vinta()) {
+			this.io.mostraMessaggio("Hai vinto!");
+		}
+
+		if (this.partita.getGiocatore().getCfu() == 0) {
+			this.io.mostraMessaggio("Hai esaurito i CFU...");
+		}
+
+		return this.partita.isFinita();
 	}
 
 	public static void main(String[] args) {
-	    IO io = new IOConsole();
-	    DiaDia gioco = new DiaDia(io);
-	    gioco.gioca();
+
+		try (java.util.Scanner scanner = new java.util.Scanner(System.in)) {
+
+			IO io = new IOConsole(scanner);
+
+			try {
+				it.uniroma3.diadia.ambienti.CaricatoreLabirinto caricatore = 
+						new it.uniroma3.diadia.ambienti.CaricatoreLabirinto(new java.io.FileReader("labirinto.txt"));
+				caricatore.carica();
+
+				it.uniroma3.diadia.ambienti.Labirinto labirinto = caricatore.getBuilder().getLabirinto();
+
+				DiaDia gioco = new DiaDia(labirinto, io);
+				gioco.gioca();
+
+			} catch (java.io.FileNotFoundException e) {
+				io.mostraMessaggio("Errore: Il file 'labirinto.txt' non è stato trovato!");
+			}
+
+		}
 	}
 }

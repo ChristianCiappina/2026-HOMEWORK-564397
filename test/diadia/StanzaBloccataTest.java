@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
+import it.uniroma3.diadia.ambienti.Direzione;
 import it.uniroma3.diadia.ambienti.Stanza;
 import it.uniroma3.diadia.ambienti.StanzaBloccata;
 import it.uniroma3.diadia.attrezzi.Attrezzo;
@@ -17,22 +18,29 @@ public class StanzaBloccataTest {
 	
 	@Before
 	public void setUp() {
-		this.stanzaAdiacente = new Stanza("Stanza a nord");
-		this.stanzaBloccata = new StanzaBloccata("Stanza bloccata", "nord", "chiave");
+		this.stanzaAdiacente = new Stanza("Stanza adiacente a nord");
+		this.stanzaBloccata = new StanzaBloccata("Stanza bloccata", Direzione.NORD, "chiave");
 		this.chiave = new Attrezzo("chiave", 1);
-		this.stanzaBloccata.impostaStanzaAdiacente("nord", this.stanzaAdiacente);
+		this.stanzaBloccata.impostaStanzaAdiacente(Direzione.NORD, this.stanzaAdiacente);
 	}
 	
 	@Test
 	public void testGetStanzaAdiacenteDirezioneBloccataSenzaChiave() {
-		Stanza stanzaRestituita = this.stanzaBloccata.getStanzaAdiacente("nord");
+		Stanza stanzaRestituita = this.stanzaBloccata.getStanzaAdiacente(Direzione.NORD);
 		assertEquals(this.stanzaBloccata, stanzaRestituita);
 	}
 
 	@Test
 	public void testGetStanzaAdiacenteDirezioneSbloccataConChiave() {
 		this.stanzaBloccata.addAttrezzo(this.chiave);
-		Stanza stanzaRestituita = this.stanzaBloccata.getStanzaAdiacente("nord");
+		Stanza stanzaRestituita = this.stanzaBloccata.getStanzaAdiacente(Direzione.NORD);
 		assertEquals(this.stanzaAdiacente, stanzaRestituita);
+	}
+	
+	@Test
+	public void testGetStanzaAdiacenteDirezioneLibera() {
+		Stanza stanzaAdiacenteASud = new Stanza("Stanza adiacente a sud");
+		this.stanzaBloccata.impostaStanzaAdiacente(Direzione.SUD, stanzaAdiacenteASud);
+		assertEquals(stanzaAdiacenteASud, this.stanzaBloccata.getStanzaAdiacente(Direzione.SUD));
 	}
 }

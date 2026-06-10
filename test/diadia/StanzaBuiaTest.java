@@ -31,4 +31,10 @@ public class StanzaBuiaTest {
 		String descrizione = this.stanzaBuia.getDescrizione();
 		assertNotEquals("Qui c'è un buio pesto", descrizione);
 	}
+	
+	@Test
+	public void testGetDescrizioneConAttrezzoNonLuminoso() {
+		this.stanzaBuia.addAttrezzo(new Attrezzo("Osso", 3));
+		assertEquals("Qui c'è un buio pesto", this.stanzaBuia.getDescrizione());
+	}
 }

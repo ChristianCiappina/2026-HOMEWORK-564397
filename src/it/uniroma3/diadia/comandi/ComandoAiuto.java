@@ -1,35 +1,23 @@
 package it.uniroma3.diadia.comandi;
 
-import it.uniroma3.diadia.IO;
+import java.util.ServiceLoader;
+import java.util.Set;
+
 import it.uniroma3.diadia.Partita;
 
-public class ComandoAiuto implements Comando {
-
-	private final static String NOME = "aiuto";
-	private IO io;
+public class ComandoAiuto extends AbstractComando {
 	
 	@Override
 	public void esegui(Partita partita) {
-		this.io.mostraMessaggio("Comandi disponibili: vai aiuto prendi posa fine");
-	}
-
-	@Override
-	public void setParametro(String parametro) {
-	}
-
-	@Override
-	public void setIO(IO io) {
-		this.io = io;
-	}
-
-	@Override
-	public String getNome() {
-		return NOME;
-	}
-
-	@Override
-	public String getParametro() {
-		return null;
+		for (Comando c: ServiceLoader.load(Comando.class)) {
+			
+		}
+		Set<String> elenco = AbstractComando.getComandiDisponibili();
+		StringBuilder output = new StringBuilder("Comandi disponibili: ");
+		for (String nomeComando : elenco) {
+			output.append(nomeComando).append(" ");
+		}
+		this.getIo().mostraMessaggio(output.toString());
 	}
 
 }

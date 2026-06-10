@@ -1,8 +1,8 @@
 package it.uniroma3.diadia.comandi;
 
 
-import it.uniroma3.diadia.IO;
 import it.uniroma3.diadia.Partita;
+import it.uniroma3.diadia.ambienti.Direzione;
 import it.uniroma3.diadia.ambienti.Stanza;
 
 /**
@@ -17,51 +17,37 @@ import it.uniroma3.diadia.ambienti.Stanza;
  * @version base
  */
 
-public class ComandoVai implements Comando {
-
-	private final static String NOME = "vai";
-    private String direzione;
-    private IO io;
+public class ComandoVai extends AbstractComando {
 
     @Override
     public void esegui(Partita partita) {
-    	Stanza stanzaCorrente = partita.getStanzaCorrente();
-    	Stanza prossimaStanza = null;
+    	String parametro = this.getParametro();
     	
-    	if (this.direzione == null) {
-    		this.io.mostraMessaggio("Dove vuoi andare ? Devi specificare una direzione");
+    	if (parametro == null) {
+    		this.getIo().mostraMessaggio("Dove vuoi andare ? Devi specificare una direzione");
     		return;
     	}
     	
-    	prossimaStanza = stanzaCorrente.getStanzaAdiacente(this.direzione);
+    	Direzione direzione;
+    	
+    	try {
+    		direzione = Direzione.valueOf(parametro.toUpperCase());
+    	} catch (IllegalArgumentException e) {
+    		this.getIo().mostraMessaggio("Direzione inesistente");
+    		return;
+    	}
+    	
+    	Stanza stanzaCorrente = partita.getStanzaCorrente();
+    	Stanza prossimaStanza = stanzaCorrente.getStanzaAdiacente(direzione);;
     	
     	if (prossimaStanza == null) {
-    		this.io.mostraMessaggio("Direzione inesistente");
+    		this.getIo().mostraMessaggio("Direzione inesistente");
     		return;
     	}
     	
     	partita.setStanzaCorrente(prossimaStanza);
-    	this.io.mostraMessaggio(partita.getStanzaCorrente().getDescrizione());
+    	this.getIo().mostraMessaggio(partita.getStanzaCorrente().getDescrizione());
     	partita.getGiocatore().setCfu(partita.getGiocatore().getCfu()-1);
     }
-    
-    @Override
-    public void setParametro(String parametro) {
-    	this.direzione = parametro;
-    }
 
-	@Override
-	public void setIO(IO io) {
-		this.io = io;
-	}
-
-	@Override
-	public String getNome() {
-		return NOME;
-	}
-
-	@Override
-	public String getParametro() {
-		return this.direzione;
-	}
 }

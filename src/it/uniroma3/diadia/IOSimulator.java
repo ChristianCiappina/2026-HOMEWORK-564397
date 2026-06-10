@@ -1,46 +1,72 @@
 package it.uniroma3.diadia;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class IOSimulator implements IO {
 
-	private String[] righeDaLeggere;
-	private int indiceProssimaRiga;
+	private List<String> righeDaLeggere;
+	private List<ComandoEseguito> cronologia;
+	private ComandoEseguito comandoCorrente;
 	
-	private String[] messaggiStampati;
-	private int indiceMessaggiStampati;
-	
-	public IOSimulator(String[] righeDaLeggere) {
+	public IOSimulator(List<String> righeDaLeggere) {
 		this.righeDaLeggere = righeDaLeggere;
-		this.indiceProssimaRiga = 0;
-		this.messaggiStampati = new String[100];
-		this.indiceMessaggiStampati = 0;
+		this.cronologia = new ArrayList<>();
+		this.comandoCorrente = null;
 	}
 	
 	@Override
 	public void mostraMessaggio(String messaggio) {
-		if (this.indiceMessaggiStampati < this.messaggiStampati.length) {
-			this.messaggiStampati[this.indiceMessaggiStampati] = messaggio;
-			this.indiceMessaggiStampati++;
+		if (this.comandoCorrente != null) {
+			this.comandoCorrente.addMessaggio(messaggio);
 		}
 	}
 
 	@Override
 	public String leggiRiga() {
-		if (this.indiceProssimaRiga < this.righeDaLeggere.length) {
-			return this.righeDaLeggere[this.indiceProssimaRiga++];
+		if (!this.righeDaLeggere.isEmpty()) {
+			String rigaLetta = this.righeDaLeggere.remove(0);
+			ComandoEseguito comando = new ComandoEseguito(rigaLetta);
+			this.comandoCorrente = comando;
+			this.cronologia.add(comandoCorrente);
+			return rigaLetta;
 		}
-		return null;
-	}
-
-	public String[] getMessaggiStampati() {
-		return this.messaggiStampati;
+		else {
+			return null;
+		}
 	}
 	
 	public boolean hasMessaggio(String messaggioCercato) {
-		for (String messaggio : this.messaggiStampati) {
-			if (messaggio != null && messaggio.equals(messaggioCercato)) {
-				return true;
+		for (ComandoEseguito comando : this.cronologia) {
+			List<String> messaggi = comando.getMessaggi();
+			for (String messaggio : messaggi) {
+				if (messaggio.equals(messaggioCercato)) {
+					return true;
+				}
 			}
 		}
 		return false;
+	}
+	
+	private class ComandoEseguito {
+		private String comando;
+		private List<String> messaggi;
+		
+		public ComandoEseguito(String comando) {
+			this.comando = comando;
+			this.messaggi = new ArrayList<>();
+		}
+		
+		public void addMessaggio(String msg) {
+			this.messaggi.add(msg);
+		}
+		
+		public String getComando() {
+			return this.comando;
+		}
+		
+		public List<String> getMessaggi() {
+			return this.messaggi;
+		}
 	}
 }

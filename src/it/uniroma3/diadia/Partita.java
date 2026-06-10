@@ -19,13 +19,26 @@ public class Partita {
 	private boolean finita;
 	private Stanza stanzaCorrente;	
 	
-	public Partita(){
-		this.labirinto = new Labirinto();
+	public Partita() {
+		this(Labirinto.newBuilder()
+				.addStanzaIniziale("Atrio")
+				.addStanzaVincente("Biblioteca")
+				.addAdiacenza("Atrio", "Biblioteca", "nord")
+				.getLabirinto());
+	}
+	
+	public Partita(Labirinto labirinto){
+		this.labirinto = labirinto;
 		this.giocatore = new Giocatore();
 		this.finita = false;
 		this.stanzaCorrente = this.labirinto.getStanzaIniziale();
 	}
 
+	public void setLabirinto(Labirinto labirinto) {
+		this.labirinto = labirinto;
+		this.stanzaCorrente = this.labirinto.getStanzaIniziale();
+	}
+	
 	public Labirinto getLabirinto() {
 		return labirinto;
 	}
@@ -68,8 +81,8 @@ public class Partita {
 
 	@Override
 	public String toString() {
-		return "Partita [labirinto=" + labirinto + ", giocatore=" + giocatore + ", finita=" + finita
-				+ ", stanzaCorrente=" + stanzaCorrente + "]";
+		return "Partita [labirinto=" + this.getLabirinto() + ", giocatore=" + this.getGiocatore() + ", finita=" + this.isFinita()
+				+ ", stanzaCorrente=" + this.getStanzaCorrente() + "]";
 	}	
 	
 }
